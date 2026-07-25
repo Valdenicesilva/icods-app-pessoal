@@ -1,0 +1,142 @@
+import os
+
+# 1. Cria o ficheiro app.py com o seu código corrigido
+codigo_app = """
+import streamlit as st
+from PIL import Image
+import os
+
+# --- CONFIGURAÇÃO DA PÁGINA ---
+st.set_page_config(page_title="Orientação Profissional e Ética", layout="wide")
+
+# --- INICIALIZAÇÃO DO SESSION STATE ---
+if 'nome' not in st.session_state: st.session_state['nome'] = ''
+if 'formacao' not in st.session_state: st.session_state['formacao'] = ''
+if 'experiencia' not in st.session_state: st.session_state['experiencia'] = ''
+if 'interesses' not in st.session_state: st.session_state['interesses'] = []
+if 'estilo' not in st.session_state: st.session_state['estilo'] = 'Analítico'
+if 'questao_etica' not in st.session_state: st.session_state['questao_etica'] = ''
+if 'pagina_atual' not in st.session_state: st.session_state['pagina_atual'] = 'Inicio'
+
+# --- FUNÇÃO PARA CARREGAR IMAGENS COM SEGURANÇA ---
+def carregar_imagem(nome_arquivo):
+    """Carrega uma imagem da pasta local 'imagens' ou usa um placeholder."""
+    try:
+        diretorio_atual = os.getcwd()
+        caminho_completo = os.path.join(diretorio_atual, 'imagens', nome_arquivo)
+        if os.path.exists(caminho_completo):
+            return Image.open(caminho_completo)
+        else:
+            st.warning(f"Aviso: A imagem '{nome_arquivo}' não foi encontrada. Usando placeholder.")
+            placeholder = Image.new('RGB', (300, 200), color=(73, 109, 137))
+            return placeholder
+    except Exception as e:
+        st.error(f"Erro crítico ao carregar imagem {nome_arquivo}: {e}")
+        return None
+
+# --- DEFINIÇÃO DAS PÁGINAS ---
+def pagina_inicio():
+    st.title("Bem-vindo à Trilha de Orientação Profissional e Comportamental")
+    st.markdown("---")
+    # CARREGA A SUA IMAGEM DA PASTA 'imagens'
+    img_inicio = carregar_imagem("fot_fundo.jpg")
+    if img_inicio:
+        st.image(img_inicio, caption="ICODS", width=400)
+    st.markdown("""
+    Esta plataforma foi desenhada para o apoiar no desenvolvimento da sua carreira,
+    aliando o seu perfil comportamental a práticas éticas de compliance.
+    """)
+    if st.button("Iniciar Diagnóstico", key='btn_inicio_diag'):
+        st.session_state['pagina_atual'] = 'Diagnostico'
+        st.rerun()
+
+def pagina_diagnostico():
+    st.header("1. Diagnóstico Comportamental e de Carreira")
+    st.markdown("---")
+    st.subheader("Dados Profissionais")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.text_input("Nome Completo", key='nome')
+        st.text_input("Formação Acadêmica", key='formacao')
+    with col2:
+        st.text_input("Área de Experiência Principal", key='experiencia')
+        st.multiselect("Áreas de Interesse Profissional", ["Compliance", "Direito", "RH", "Gestão", "Tecnologia"], key='interesses')
+    st.markdown("---")
+    st.subheader("Diagnóstico Rápido de Estilo")
+    st.radio("Como você descreve o seu estilo de trabalho?", ["Analítico", "Colaborativo", "Dinâmico", "Liderança"], key='estilo')
+    st.markdown("---")
+    st.text_area("Descreva uma situação que considera um dilema ético na sua carreira (Opcional)", key='questao_etica')
+    st.markdown("---")
+    col_bt1, col_bt2 = st.columns([1, 5])
+    with col_bt1:
+         if st.button("Voltar", key='btn_diag_voltar'):
+            st.session_state['pagina_atual'] = 'Inicio'
+            st.rerun()
+    with col_bt2:
+        if st.button("Gerar Guia de Carreira", key='btn_diag_gerar'):
+            st.session_state['pagina_atual'] = 'Guia'
+            st.rerun()
+
+def pagina_guia():
+    st.header("2. Seu Guia de Orientação Profissional e Ética")
+    st.markdown("---")
+    st.success("Diagnóstico gerado com sucesso! Abaixo estão as orientações baseadas no seu perfil.")
+    st.markdown("### Resumo do seu Perfil")
+    st.write(f"**Nome:** {st.session_state['nome']}")
+    st.write(f"**Formação:** {st.session_state['formacao']}")
+    interesses = st.session_state['interesses']
+    interesses_str = ', '.join(interesses) if interesses else "Não informado"
+    st.write(f"**Área de Interesse:** {interesses_str}")
+    st.markdown("### Análise Comportamental e Compliance")
+    estilo = st.session_state['estilo']
+    if estilo == 'Analítico':
+        st.info("O seu estilo analítico é muito valioso para funções de auditoria e compliance!")
+    elif estilo == 'Liderança':
+        st.info("O seu perfil é ideal para liderança e gestão de equipes, com foco em ética.")
+    else:
+        st.info("O seu perfil colaborativo/dinâmico é excelente para integrar equipes de alta performance.")
+    st.markdown("""
+    ---
+    **Próximos Passos:**
+    1.  Revise os cursos recomendados na nossa plataforma.
+    2.  Aplique os princípios de compliance na sua área de atuação.
+    """)
+    if st.button("Nova Avaliação", key='btn_guia_nova'):
+        st.session_state['nome'] = ''
+        st.session_state['formacao'] = ''
+        st.session_state['experiencia'] = ''
+        st.session_state['interesses'] = []
+        st.session_state['estilo'] = 'Analítico'
+        st.session_state['questao_etica'] = ''
+        st.session_state['pagina_atual'] = 'Inicio'
+        st.rerun()
+
+if st.session_state['pagina_atual'] == 'Inicio':
+    pagina_inicio()
+elif st.session_state['pagina_atual'] == 'Diagnostico':
+    pagina_diagnostico()
+elif st.session_state['pagina_atual'] == 'Guia':
+    pagina_guia()
+st.markdown("---")
+st.markdown("© 2026 | Plataforma de Desenvolvimento Behavioral Compliance")
+"""
+
+with open('app.py', 'w', encoding='utf-8') as f:
+    f.write(codigo_app.strip())
+print("✅ Ficheiro 'app.py' criado com sucesso!")
+
+# 2. Cria o ficheiro requirements.txt
+content_req = """
+streamlit
+pillow
+"""
+with open('requirements.txt', 'w', encoding='utf-8') as f:
+    f.write(content_req.strip())
+print("✅ Ficheiro 'requirements.txt' criado com sucesso!")
+
+# 3. Garante que a pasta 'imagens' existe no ambiente
+if not os.path.exists('imagens'):
+    os.makedirs('imagens')
+    print("✅ Pasta 'imagens' criada com sucesso! (Lembre-se de fazer upload da sua imagem para lá).")
+else:
+    print("ℹ️ A pasta 'imagens' já existe.")
