@@ -34,7 +34,7 @@ def carregar_imagem(nome_arquivo):
 
 # --- DEFINIÇÃO DAS PÁGINAS ---
 def pagina_inicio():
-    st.title("Bem-vindo à Trilha de Orientação Profissional e Comportamental")
+    st.title("Bem-vindo à Trilha de Orientação Profissional")
     st.markdown("---")
     # CARREGA A SUA IMAGEM DA RAIZ
     img_inicio = carregar_imagem("fot_fundo.jpg")
