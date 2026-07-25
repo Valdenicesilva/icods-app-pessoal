@@ -19,15 +19,22 @@ if 'questao_etica' not in st.session_state: st.session_state['questao_etica'] = 
 if 'pagina_atual' not in st.session_state: st.session_state['pagina_atual'] = 'Inicio'
 
 # --- FUNÇÃO PARA CARREGAR IMAGENS COM SEGURANÇA ---
+# --- CÓDIGO CORRIGIDO (Substitua a função inteira ou só a linha indicada) ---
+
 def carregar_imagem(nome_arquivo):
-    """Carrega uma imagem da pasta local 'imagens' ou usa um placeholder."""
+    """Carrega uma imagem da pasta local (raiz) ou usa um placeholder."""
     try:
         diretorio_atual = os.getcwd()
-        caminho_completo = os.path.join(diretorio_atual, 'imagens', nome_arquivo)
+        # --- LINHA ALTERADA AQUI ---
+        # Antes: caminho_completo = os.path.join(diretorio_atual, 'imagens', nome_arquivo)
+        # AGORA: O caminho é direto no diretório atual
+        caminho_completo = os.path.join(diretorio_atual, nome_arquivo)
+        # ---------------------------
+
         if os.path.exists(caminho_completo):
             return Image.open(caminho_completo)
         else:
-            st.warning(f"Aviso: A imagem '{nome_arquivo}' não foi encontrada. Usando placeholder.")
+            st.warning(f"Aviso: A imagem '{nome_arquivo}' não foi encontrada em '{diretorio_atual}'. Usando placeholder.")
             placeholder = Image.new('RGB', (300, 200), color=(73, 109, 137))
             return placeholder
     except Exception as e:
