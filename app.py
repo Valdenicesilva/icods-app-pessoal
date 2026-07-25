@@ -1,7 +1,3 @@
-import os
-
-# 1. Cria o ficheiro app.py com o seu código corrigido
-codigo_app = """
 import streamlit as st
 from PIL import Image
 import os
@@ -19,17 +15,12 @@ if 'questao_etica' not in st.session_state: st.session_state['questao_etica'] = 
 if 'pagina_atual' not in st.session_state: st.session_state['pagina_atual'] = 'Inicio'
 
 # --- FUNÇÃO PARA CARREGAR IMAGENS COM SEGURANÇA ---
-# --- CÓDIGO CORRIGIDO (Substitua a função inteira ou só a linha indicada) ---
-
 def carregar_imagem(nome_arquivo):
     """Carrega uma imagem da pasta local (raiz) ou usa um placeholder."""
     try:
         diretorio_atual = os.getcwd()
-        # --- LINHA ALTERADA AQUI ---
-        # Antes: caminho_completo = os.path.join(diretorio_atual, 'imagens', nome_arquivo)
-        # AGORA: O caminho é direto no diretório atual
+        # O caminho é direto no diretório atual (raiz)
         caminho_completo = os.path.join(diretorio_atual, nome_arquivo)
-        # ---------------------------
 
         if os.path.exists(caminho_completo):
             return Image.open(caminho_completo)
@@ -45,7 +36,7 @@ def carregar_imagem(nome_arquivo):
 def pagina_inicio():
     st.title("Bem-vindo à Trilha de Orientação Profissional e Comportamental")
     st.markdown("---")
-    # CARREGA A SUA IMAGEM DA PASTA 'imagens'
+    # CARREGA A SUA IMAGEM DA RAIZ
     img_inicio = carregar_imagem("fot_fundo.jpg")
     if img_inicio:
         st.image(img_inicio, caption="ICODS", width=400)
@@ -126,24 +117,3 @@ elif st.session_state['pagina_atual'] == 'Guia':
     pagina_guia()
 st.markdown("---")
 st.markdown("© 2026 | Plataforma de Desenvolvimento Behavioral Compliance")
-"""
-
-with open('app.py', 'w', encoding='utf-8') as f:
-    f.write(codigo_app.strip())
-print("✅ Ficheiro 'app.py' criado com sucesso!")
-
-# 2. Cria o ficheiro requirements.txt
-content_req = """
-streamlit
-pillow
-"""
-with open('requirements.txt', 'w', encoding='utf-8') as f:
-    f.write(content_req.strip())
-print("✅ Ficheiro 'requirements.txt' criado com sucesso!")
-
-# 3. Garante que a pasta 'imagens' existe no ambiente
-if not os.path.exists('imagens'):
-    os.makedirs('imagens')
-    print("✅ Pasta 'imagens' criada com sucesso! (Lembre-se de fazer upload da sua imagem para lá).")
-else:
-    print("ℹ️ A pasta 'imagens' já existe.")
