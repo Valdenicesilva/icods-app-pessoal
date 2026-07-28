@@ -6,12 +6,11 @@ import os
 st.set_page_config(page_title="Plataforma ICODS - Trilha de Desenvolvimento", layout="wide")
 
 # --- INICIALIZAÇÃO DO SESSION STATE ---
-# Adicionei 'Fase2' e 'Fase3' à lista de páginas possíveis
 paginas_validas = ['Inicio', 'Diagnostico', 'Fase2', 'Fase3']
 if 'pagina_atual' not in st.session_state or st.session_state['pagina_atual'] not in paginas_validas:
     st.session_state['pagina_atual'] = 'Inicio'
 
-# Inicialização dos dados do usuário (mantida conforme o original)
+# Inicialização dos dados do usuário
 if 'nome' not in st.session_state: st.session_state['nome'] = ''
 if 'formacao' not in st.session_state: st.session_state['formacao'] = ''
 if 'experiencia' not in st.session_state: st.session_state['experiencia'] = ''
@@ -19,7 +18,7 @@ if 'interesses' not in st.session_state: st.session_state['interesses'] = []
 if 'estilo' not in st.session_state: st.session_state['estilo'] = 'Analítico'
 if 'questao_etica' not in st.session_state: st.session_state['questao_etica'] = ''
 
-# Variáveis para armazenar os resultados das novas fases (para uso futuro)
+# Variáveis para armazenar os resultados das novas fases
 if 'resultado_fase2' not in st.session_state: st.session_state['resultado_fase2'] = ''
 if 'resultado_fase3' not in st.session_state: st.session_state['resultado_fase3'] = ''
 
@@ -34,7 +33,6 @@ def carregar_imagem(nome_arquivo):
             return Image.open(caminho_completo)
         else:
             st.warning(f"Aviso: A imagem '{nome_arquivo}' não foi encontrada em '{diretorio_atual}'.")
-            # Retorna None se a imagem não existir, para evitar erro no st.image
             return None
     except Exception as e:
         st.error(f"Erro crítico ao carregar imagem {nome_arquivo}: {e}")
@@ -45,7 +43,6 @@ def carregar_imagem(nome_arquivo):
 def pagina_inicio():
     st.title("Trilha de Orientação Profissional")
     st.markdown("---")
-    # CARREGA A SUA IMAGEM DA RAIZ
     img_inicio = carregar_imagem("fot_fundo.jpg")
     if img_inicio:
         st.image(img_inicio, caption="ICODS - Desenvolvimento Comportamental", width=400)
@@ -86,18 +83,98 @@ def pagina_diagnostico():
             st.session_state['pagina_atual'] = 'Inicio'
             st.rerun()
     with col_bt3:
-        if st.button("Avançar para Fase 2: Desenvolvimento", key='btn_diag_avancar', type="primary"):
+        if st.button("Avançar para Fase 2: Raio-X e Oportunidades", key='btn_diag_avancar', type="primary"):
             st.session_state['pagina_atual'] = 'Fase2'
             st.rerun()
 
 def pagina_fase2():
-    st.header("Fase 2: Desenvolvimento e Capacitação")
+    st.header("Fase 2: Inteligência de Mercado e Oportunidades Locais")
     st.markdown("---")
-    st.write("### Conteúdo da Fase 2")
-    st.info("⚠️ **Área de Edição:** Insira aqui o material, vídeos ou questionários específicos da Fase 2.")
+    
+    # Inserção do painel de Inteligência de Mercado (Raio-X CAGED/IBGE)
+    st.markdown("""
+    <style>
+        .market-intelligence-section {
+            background: #ffffff;
+            padding: 1rem 0;
+        }
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .indicator-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        .indicator-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.75rem;
+        }
+        .indicator-card p {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 0.5rem;
+            text-align: justify;
+        }
+        .career-decision-box {
+            background: rgba(45, 212, 191, 0.1);
+            border-left: 4px solid #0d9488;
+            padding: 1.25rem;
+            border-radius: 0 12px 12px 0;
+        }
+        .career-decision-box h4 {
+            color: #0f172a;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .career-decision-box p {
+            color: #334155;
+            font-size: 0.9rem;
+            margin: 0;
+            text-align: justify;
+        }
+    </style>
 
-    # Exemplo de input para a Fase 2
-    st.text_area("Notas de progresso na Fase 2", key='resultado_fase2', height=150, placeholder="Escreva suas reflexões sobre o módulo...")
+    <section class="market-intelligence-section">
+        <div class="container">
+            <div class="section-header">
+                <h3>📊 Raio-X do Mercado na sua Região</h3>
+                <p>Entenda o cenário real de empregabilidade (dados oficiais do CAGED/IBGE) para decidir onde investir seu tempo e sua carreira no Agreste Pernambucano.</p>
+            </div>
+
+            <div class="indicators-grid">
+                <div class="indicator-card">
+                    <h3>📈 Perfil de Contratações</h3>
+                    <p><strong>Destaque por Faixa Etária:</strong> Maior volume de vagas formais concentrado na faixa de 18 a 29 anos.</p>
+                    <p><strong>Recorte de Gênero/Raça:</strong> Panorama atual das admissões formais na região.</p>
+                </div>
+                
+                <div class="indicator-card">
+                    <h3>🏭 Setores que Mais Empregam</h3>
+                    <p>1. <strong>Indústria de Transformação</strong> (Calçados, Metalmecânica, Alimentos)</p>
+                    <p>2. <strong>Comércio Varejista e Atacadista</strong></p>
+                    <p>3. <strong>Serviços e Agroindústria</strong></p>
+                </div>
+            </div>
+
+            <div class="career-decision-box">
+                <h4>💡 Dica de Direcionamento Profissional</h4>
+                <p>Se a sua área pretendida apresenta baixa empregabilidade na região, o app te ajuda a identificar competências transferíveis para os setores que estão contratando ativamente no seu "quintal".</p>
+            </div>
+        </div>
+    </section>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.write("### Notas e Alinhamento Profissional")
+    st.text_area("Notas de progresso na Fase 2", key='resultado_fase2', height=150, placeholder="Escreva suas reflexões sobre as oportunidades mapeadas na região...")
 
     st.markdown("---")
     # Botões de navegação
@@ -122,11 +199,9 @@ def pagina_fase3():
     st.write(f"**Estilo:** {st.session_state['estilo']}")
     st.info("⚠️ **Área de Edição:** Insira aqui o plano de ação final, certificado ou recomendações baseadas no perfil.")
 
-    # Exemplo de input para a Fase 3
     st.text_area("Plano de Ação Individual (PAI)", key='resultado_fase3', height=150, placeholder="Defina seus próximos passos...")
 
     st.markdown("---")
-    # Botões de navegação
     col_bt1, col_bt2 = st.columns([1, 5])
     with col_bt1:
          if st.button("Voltar para Fase 2", key='btn_f3_voltar'):
@@ -135,7 +210,6 @@ def pagina_fase3():
 
     st.markdown("---")
     if st.button("Reiniciar Todo o Processo (Voltar ao Início)", key='btn_f3_reiniciar'):
-        # Limpa o session state se desejar reiniciar a avaliação
         st.session_state['nome'] = ''
         st.session_state['formacao'] = ''
         st.session_state['experiencia'] = ''
@@ -148,7 +222,6 @@ def pagina_fase3():
         st.rerun()
 
 # --- FLUXO DE NAVEGAÇÃO PRINCIPAL ---
-# Define qual função de página será chamada com base no estado atual
 pagina_atual = st.session_state['pagina_atual']
 
 if pagina_atual == 'Inicio':
