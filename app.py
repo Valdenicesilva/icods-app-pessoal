@@ -1,6 +1,7 @@
 import streamlit as st
 from PIL import Image
 import os
+import textwrap
 from supabase import create_client
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
@@ -162,7 +163,7 @@ def pagina_fase2():
                     else:
                         setores_html = "<p>Nenhum setor registrado.</p>"
 
-                    html_card = f"""
+                    html_card = textwrap.dedent(f"""
                     <div class="market-intelligence-section">
                         <div class="indicators-grid">
                             <div class="indicator-card">
@@ -182,7 +183,7 @@ def pagina_fase2():
                             <p>O app cruza o seu perfil comportamental com a realidade econômica deste município para orientar suas transições de carreira.</p>
                         </div>
                     </div>
-                    """
+                    """)
                     st.markdown(html_card, unsafe_allow_html=True)
 
     st.markdown("---")
