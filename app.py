@@ -101,19 +101,6 @@ def pagina_diagnostico():
 def pagina_fase2():
     st.header("Fase 2: Inteligência de Mercado e Oportunidades Locais")
     st.markdown("---")
-    
-    st.markdown("""
-    <style>
-        .market-intelligence-section { background: #ffffff; padding: 1rem 0; }
-        .indicators-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
-        .indicator-card { background: #f8fafc; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; }
-        .indicator-card h3 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem; }
-        .indicator-card p { font-size: 0.9rem; color: #475569; margin-bottom: 0.5rem; text-align: justify; }
-        .career-decision-box { background: rgba(45, 212, 191, 0.1); border-left: 4px solid #0d9488; padding: 1.25rem; border-radius: 0 12px 12px 0; }
-        .career-decision-box h4 { color: #0f172a; font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .career-decision-box p { color: #334155; font-size: 0.9rem; margin: 0; text-align: justify; }
-    </style>
-    """, unsafe_allow_html=True)
 
     st.markdown("### 📊 Raio-X do Mercado por Região")
     st.write("Selecione a região, o estado e o município desejado para consultar os indicadores oficiais de empregabilidade.")
@@ -156,35 +143,29 @@ def pagina_fase2():
                     genero = dados.get('genero_raca', 'Sem dados cadastrados.')
                     setores = dados.get('setores_lideres', [])
 
-                    setores_html = ""
-                    if setores:
-                        for idx, setor in enumerate(setores, 1):
-                            setores_html += f"<p>{idx}. <strong>{setor}</strong></p>"
-                    else:
-                        setores_html = "<p>Nenhum setor registrado.</p>"
-
-                    html_card = textwrap.dedent(f"""
-                    <div class="market-intelligence-section">
-                        <div class="indicators-grid">
-                            <div class="indicator-card">
-                                <h3>📈 Perfil de Contratações ({cidade_selecionada})</h3>
-                                <p><strong>Destaque por Faixa Etária:</strong> {faixa}</p>
-                                <p><strong>Recorte de Gênero/Raça:</strong> {genero}</p>
-                            </div>
+                    st.markdown("---")
+                    
+                    # Layout em colunas nativas do Streamlit
+                    col_card1, col_card2 = st.columns(2)
+                    
+                    with col_card1:
+                        with st.container(border=True):
+                            st.markdown(f"### 📈 Perfil de Contratações")
+                            st.markdown(f"**Município:** {cidade_selecionada}")
+                            st.markdown(f"**Destaque por Faixa Etária:** {faixa}")
+                            st.markdown(f"**Recorte de Gênero/Raça:** {genero}")
                             
-                            <div class="indicator-card">
-                                <h3>🏭 Setores que Mais Empregam</h3>
-                                {setores_html}
-                            </div>
-                        </div>
+                    with col_card2:
+                        with st.container(border=True):
+                            st.markdown(f"### 🏭 Setores que Mais Empregam")
+                            if setores:
+                                for idx, setor in enumerate(setores, 1):
+                                    st.markdown(f"{idx}. **{setor}**")
+                            else:
+                                st.markdown("Nenhum setor registrado.")
 
-                        <div class="career-decision-box">
-                            <h4>💡 Dica de Direcionamento Profissional</h4>
-                            <p>O app cruza o seu perfil comportamental com a realidade econômica deste município para orientar suas transições de carreira.</p>
-                        </div>
-                    </div>
-                    """)
-                    st.markdown(html_card, unsafe_allow_html=True)
+                    # Caixa de direcionamento profissional nativa
+                    st.success("💡 **Dica de Direcionamento Profissional:** O app cruza o seu perfil comportamental com a realidade econômica deste município para orientar suas transições de carreira.")
 
     st.markdown("---")
     st.write("### Notas e Alinhamento Profissional")
