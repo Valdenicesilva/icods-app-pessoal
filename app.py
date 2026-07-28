@@ -117,73 +117,73 @@ def pagina_fase2():
     st.markdown("### 📊 Raio-X do Mercado por Região")
     st.write("Selecione a região, o estado e o município desejado para consultar os indicadores oficiais de empregabilidade.")
 
-    # 1. Seletor de Região
-    regioes = ["Norte", "Nordeste", "Sul", "Sudeste", "Centro-Oeste"]
-    regiao_selecionada = st.selectbox("Selecione a Região:", regioes)
-
-    estados_por_regiao = {
-        "Norte": ["Acre", "Amapá", "Amazonas", "Pará", "Rondônia", "Roraima", "Tocantins"],
-        "Nordeste": ["Alagoas", "Bahia", "Ceará", "Maranhão", "Paraíba", "Pernambuco", "Piauí", "Rio Grande do Norte", "Sergipe"],
-        "Sul": ["Paraná", "Rio Grande do Sul", "Santa Catarina"],
-        "Sudeste": ["Espírito Santo", "Minas Gerais", "Rio de Janeiro", "São Paulo"],
-        "Centro-Oeste": ["Distrito Federal", "Goiás", "Mato Grosso", "Mato Grosso do Sul"]
-    }
-
-    # 2. Seletor de Estado filtrado pela Região
-    estado_selecionado = st.selectbox("Selecione o Estado:", estados_por_regiao.get(regiao_selecionada, []))
-
-    # Buscar municípios disponíveis no Supabase para o estado selecionado
+    # Buscar todos os registros do banco para montar a hierarquia dinamicamente
     try:
-        resp_cidades = supabase.table("indicadores_regionais").select("cidade").eq("regiao", regiao_selecionada).eq("estado", estado_selecionado).execute()
-        cidades_disponiveis = [item["cidade"] for item in resp_cidades.data] if resp_cidades.data else []
-    except Exception:
-        cidades_disponiveis = []
+        response_all = supabase.table("indicadores_regionais").select("regiao, estado, cidade").execute()
+        dados_db = response_all.data if response_all.data else []
+    except Exception as e:
+        dados_db = []
+        st.error(f"Erro ao carregar dados do Supabase: {e}")
 
-    if cidades_disponiveis:
-        cidade_selecionada = st.selectbox("Selecione o Município:", cidades_disponiveis)
-        
-        # Buscar dados completos do município escolhido
-        response = supabase.table("indicadores_regionais").select("*").eq("cidade", cidade_selecionada).execute()
-        dados = response.data[0] if response.data else None
-
-        if dados:
-            st.info(f"📅 **Mês de Referência dos Dados:** {dados.get('mes_referencia', 'N/A')}")
-
-            faixa = dados.get('faixa_etaria', 'Sem dados cadastrados.')
-            genero = dados.get('genero_raca', 'Sem dados cadastrados.')
-            setores = dados.get('setores_lideres', [])
-
-            setores_html = ""
-            if setores:
-                for idx, setor in enumerate(setores, 1):
-                    setores_html += f"<p>{idx}. <strong>{setor}</strong></p>"
-            else:
-                setores_html = "<p>Nenhum setor registrado.</p>"
-
-            html_card = f"""
-            <div class="market-intelligence-section">
-                <div class="indicators-grid">
-                    <div class="indicator-card">
-                        <h3>📈 Perfil de Contratações ({cidade_selecionada})</h3>
-                        <p><strong>Destaque por Faixa Etária:</strong> {faixa}</p>
-                        <p><strong>Recorte de Gênero/Raça:</strong> {genero}</p>
-                    </div>
-                    
-                    <div class="indicator-card">
-                        <h3>🏭 Setores que Mais Empregam</h3>
-                        {setores_html}
-                    </div>
-                </div>
-
-                <div class="career-decision-box">
-                    <h4>💡 Dica de Direcionamento Profissional</h4>
-                    <p>O app cruza o seu perfil comportamental com a realidade econômica deste município para orientar suas transições de carreira.</p>
-                </div>
-            </div>
-            """
-            st.markdown(html_card, unsafe_allow_html=True)
+    if not dados_db:
+        st.warning("⚠️ Nenhum indicador regional encontrado no banco de dados. Insira dados na tabela `indicadores_regionais` para iniciar.")
     else:
-        st.warning(f"Ainda não há municípios cadastrados no banco para o estado de {estado_selecionado} ({regiao_selecionada}).")
+        # 1. Seletor de Região dinâmico baseado apenas em registros existentes
+        regioes_disponiveis = sorted(list(set(item["regiao"] for item in dados_db if item.get("regiao"))))
+        regiao_selecionada = st.selectbox("Selecione a Região:", regioes_disponiveis)
+
+        # 2. Seletor de Estado dinâmico filtrado pela Região selecionada
+        estados_disponiveis = sorted(list(set(item["estado"] for item in dados_db if item.get("regiao") == regiao_selecionada and item.get("estado"))))
+        
+        if estados_disponiveis:
+            estado_selecionado = st.selectbox("Selecione o Estado:", estados_disponiveis)
+
+            # 3. Seletor de Município dinâmico filtrado pelo Estado selecionado
+            cidades_disponiveis = sorted(list(set(item["cidade"] for item in dados_db if item.get("estado") == estado_selecionado and item.get("cidade"))))
+            
+            if cidades_disponiveis:
+                cidade_selecionada = st.selectbox("Selecione o Município:", cidades_disponiveis)
+                
+                # Buscar dados completos do município escolhido
+                response = supabase.table("indicadores_regionais").select("*").eq("cidade", cidade_selecionada).execute()
+                dados = response.data[0] if response.data else None
+
+                if dados:
+                    st.info(f"📅 **Mês de Referência dos Dados:** {dados.get('mes_referencia', 'N/A')}")
+
+                    faixa = dados.get('faixa_etaria', 'Sem dados cadastrados.')
+                    genero = dados.get('genero_raca', 'Sem dados cadastrados.')
+                    setores = dados.get('setores_lideres', [])
+
+                    setores_html = ""
+                    if setores:
+                        for idx, setor in enumerate(setores, 1):
+                            setores_html += f"<p>{idx}. <strong>{setor}</strong></p>"
+                    else:
+                        setores_html = "<p>Nenhum setor registrado.</p>"
+
+                    html_card = f"""
+                    <div class="market-intelligence-section">
+                        <div class="indicators-grid">
+                            <div class="indicator-card">
+                                <h3>📈 Perfil de Contratações ({cidade_selecionada})</h3>
+                                <p><strong>Destaque por Faixa Etária:</strong> {faixa}</p>
+                                <p><strong>Recorte de Gênero/Raça:</strong> {genero}</p>
+                            </div>
+                            
+                            <div class="indicator-card">
+                                <h3>🏭 Setores que Mais Empregam</h3>
+                                {setores_html}
+                            </div>
+                        </div>
+
+                        <div class="career-decision-box">
+                            <h4>💡 Dica de Direcionamento Profissional</h4>
+                            <p>O app cruza o seu perfil comportamental com a realidade econômica deste município para orientar suas transições de carreira.</p>
+                        </div>
+                    </div>
+                    """
+                    st.markdown(html_card, unsafe_allow_html=True)
 
     st.markdown("---")
     st.write("### Notas e Alinhamento Profissional")
