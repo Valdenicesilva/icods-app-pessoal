@@ -29,7 +29,7 @@ if 'interesses' not in st.session_state: st.session_state['interesses'] = []
 if 'estilo' not in st.session_state: st.session_state['estilo'] = 'Analítico'
 if 'questao_etica' not in st.session_state: st.session_state['questao_etica'] = ''
 
-# Variáveis para armazenar os resultados das novas fases
+# Variáveis para armazenar os resultados das fases
 if 'resultado_fase2' not in st.session_state: st.session_state['resultado_fase2'] = ''
 if 'resultado_fase3' not in st.session_state: st.session_state['resultado_fase3'] = ''
 
@@ -164,7 +164,6 @@ def pagina_fase2():
                             else:
                                 st.markdown("Nenhum setor registrado.")
 
-                    # Caixa de direcionamento profissional nativa
                     st.success("💡 **Dica de Direcionamento Profissional:** O app cruza o seu perfil comportamental com a realidade econômica deste município para orientar suas transições de carreira.")
 
     st.markdown("---")
@@ -179,42 +178,99 @@ def pagina_fase2():
             st.session_state['pagina_atual'] = 'Diagnostico'
             st.rerun()
     with col_bt3:
-        if st.button("Finalizar e Ir para Fase 3", key='btn_f2_avancar', type="primary"):
+        if st.button("Avançar para Fase 3: Trabalho Remoto", key='btn_f2_avancar', type="primary"):
             st.session_state['pagina_atual'] = 'Fase3'
             st.rerun()
 
 def pagina_fase3():
-    st.header("Fase 3: Conclusão e Plano de Ação")
+    st.header("Fase 3: O Ecossistema Virtual e de Trabalho Remoto")
     st.markdown("---")
-    st.write("### Conteúdo da Fase 3")
-    st.success("🎉 Parabéns por chegar até aqui! Resumo do seu perfil:")
+    
+    st.markdown("### 🌐 Rompendo Barreiras Geográficas")
+    st.write("Esta fase expande suas oportunidades para além do mercado local, conectando você a vagas de trabalho remoto em todo o país e avaliando sua prontidão para o modelo home office.")
 
-    # Exibindo dados básicos do diagnóstico
-    st.write(f"**Nome:** {st.session_state['nome']}")
-    st.write(f"**Estilo:** {st.session_state['estilo']}")
-    st.info("⚠️ **Área de Edição:** Insira aqui o plano de ação final, certificado ou recomendações baseadas no perfil.")
+    # 1. Avaliação de Afinidade e Ferramentas Básicas para Trabalho Remoto
+    st.markdown("#### 🔍 Avaliação de Prontidão para o Trabalho Remoto")
+    st.write("Marque os itens abaixo para verificar seu nível de adequação e infraestrutura técnica e comportamental para o formato à distância:")
 
-    st.text_area("Plano de Ação Individual (PAI)", key='resultado_fase3', height=150, placeholder="Defina seus próximos passos...")
+    with st.container(border=True):
+        col_f3_1, col_f3_2 = st.columns(2)
+        
+        with col_f3_1:
+            st.markdown("**Infraestrutura Tecnológica**")
+            internet = st.checkbox("Possuo internet banda larga estável", key="rem_internet")
+            computador = st.checkbox("Computador/Notebook em bom estado de funcionamento", key="rem_pc")
+            espaco = st.checkbox("Espaço físico adequado e silencioso para trabalho em casa", key="rem_espaco")
+            
+        with col_f3_2:
+            st.markdown("**Perfil Comportamental e Autonomia**")
+            autonomia = st.checkbox("Tenho facilidade para gerenciar meu próprio tempo e prazos", key="rem_autonomia")
+            comunicacao = st.checkbox("Boa comunicação escrita e digital (Slack, Teams, Zoom, etc.)", key="rem_comunicacao")
+            aprendizado = st.checkbox("Disposição para aprendizado contínuo de novas ferramentas digitais", key="rem_aprendizado")
+
+        # Cálculo dinâmico da pontuação de prontidão
+        itens_checados = sum([internet, computador, espaco, autonomia, comunicacao, aprendizado])
+        
+        st.markdown("---")
+        if itens_checados == 6:
+            st.success("🌟 **Prontidão Excelente!** Você possui todos os requisitos ideais de infraestrutura e perfil para atuar com alta performance em regime remoto.")
+        elif itens_checados >= 4:
+            st.info("👍 **Boa Prontidão!** Você tem uma base sólida, mas vale atentar para os itens ainda não marcados para mitigar eventuais gargalos à distância.")
+        else:
+            st.warning("⚠️ **Atenção aos Requisitos:** O trabalho remoto exige autonomia e ferramentas específicas. Considere estruturar os pontos pendentes para ampliar suas chances competitivas.")
 
     st.markdown("---")
-    col_bt1, col_bt2 = st.columns([1, 5])
+
+    # 2. Seção Dedicada de Vagas Virtuais e Remotas (Plataformas Idôneas)
+    st.markdown("### 💼 Portais e Plataformas Especializadas em Trabalho Remoto")
+    st.write("Explore portais e ecossistemas de referência nacional e internacional que contratam em regime 100% home office ou híbrido:")
+
+    col_plat1, col_plat2, col_plat3 = st.columns(3)
+
+    with col_plat1:
+        with st.container(border=True):
+            st.markdown("#### 🚀 Remotar & Coodesh")
+            st.markdown("Plataformas brasileiras focadas em conectar profissionais a vagas de tecnologia, produtos e operações remotas.")
+            st.markdown("[🔗 Acessar Remotar](https://remotar.com.br/)")
+            st.markdown("[🔗 Acessar Coodesh](https://coodesh.com/)")
+
+    with col_plat2:
+        with st.container(border=True):
+            st.markdown("#### 💻 Tech & Digital")
+            st.markdown("Portais voltados para desenvolvimento, suporte digital, atendimento e marketing em empresas inovadoras.")
+            st.markdown("[🔗 Geek Hunter](https://www.geekhunter.com.br/)")
+            st.markdown("[🔗 Trampos.co](https://trampos.co/)")
+
+    with col_plat3:
+        with st.container(border=True):
+            st.markdown("#### 🌍 Ecossistema Global")
+            st.markdown("Plataformas internacionais com forte presença de vagas remotas para falantes de português e espanhol.")
+            st.markdown("[🔗 We Work Remotely](https://weworkremotely.com/)")
+            st.markdown("[🔗 Remote.co](https://remote.co/)")
+
+    st.markdown("---")
+    st.write("### Notas e Alinhamento Profissional para o Home Office")
+    st.text_area("Notas de progresso na Fase 3", key='resultado_fase3', height=150, placeholder="Escreva sua estratégia de posicionamento, ajustes necessários no currículo ou metas de capacitação digital...")
+
+    st.markdown("---")
+    # Botões de navegação
+    col_bt1, col_bt2, col_bt3 = st.columns([1, 1, 4])
     with col_bt1:
-         if st.button("Voltar para Fase 2", key='btn_f3_voltar'):
+         if st.button("Voltar à Fase 2", key='btn_f3_voltar'):
             st.session_state['pagina_atual'] = 'Fase2'
             st.rerun()
-
-    st.markdown("---")
-    if st.button("Reiniciar Todo o Processo (Voltar ao Início)", key='btn_f3_reiniciar'):
-        st.session_state['nome'] = ''
-        st.session_state['formacao'] = ''
-        st.session_state['experiencia'] = ''
-        st.session_state['interesses'] = []
-        st.session_state['estilo'] = 'Analítico'
-        st.session_state['questao_etica'] = ''
-        st.session_state['resultado_fase2'] = ''
-        st.session_state['resultado_fase3'] = ''
-        st.session_state['pagina_atual'] = 'Inicio'
-        st.rerun()
+    with col_bt3:
+        if st.button("Reiniciar Todo o Processo", key='btn_f3_reiniciar', type="primary"):
+            st.session_state['nome'] = ''
+            st.session_state['formacao'] = ''
+            st.session_state['experiencia'] = ''
+            st.session_state['interesses'] = []
+            st.session_state['estilo'] = 'Analítico'
+            st.session_state['questao_etica'] = ''
+            st.session_state['resultado_fase2'] = ''
+            st.session_state['resultado_fase3'] = ''
+            st.session_state['pagina_atual'] = 'Inicio'
+            st.rerun()
 
 # --- FLUXO DE NAVEGAÇÃO PRINCIPAL ---
 pagina_atual = st.session_state['pagina_atual']
