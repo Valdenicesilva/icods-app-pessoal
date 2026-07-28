@@ -17,11 +17,11 @@ def init_connection():
 supabase = init_connection()
 
 # --- INICIALIZAÇÃO DO SESSION STATE ---
-paginas_validas = ['Inicio', 'Diagnostico', 'Fase2', 'Fase3']
+paginas_validas = ['Inicio', 'Diagnostico', 'Fase2', 'Fase3', 'Fase4']
 if 'pagina_atual' not in st.session_state or st.session_state['pagina_atual'] not in paginas_validas:
     st.session_state['pagina_atual'] = 'Inicio'
 
-# Inicialização dos dados do usuário (Fase 1 e demais)
+# Inicialização dos dados do usuário (Fases e Navegação)
 if 'nome' not in st.session_state: st.session_state['nome'] = ''
 if 'formacao' not in st.session_state: st.session_state['formacao'] = ''
 if 'experiencia' not in st.session_state: st.session_state['experiencia'] = ''
@@ -31,9 +31,10 @@ if 'ambiente_ideal' not in st.session_state: st.session_state['ambiente_ideal'] 
 if 'cenario_simulado' not in st.session_state: st.session_state['cenario_simulado'] = 0
 if 'questao_etica' not in st.session_state: st.session_state['questao_etica'] = ''
 
-# Variáveis para armazenar os resultados das fases
+# Variáveis para armazenar os resultados e notas das fases
 if 'resultado_fase2' not in st.session_state: st.session_state['resultado_fase2'] = ''
 if 'resultado_fase3' not in st.session_state: st.session_state['resultado_fase3'] = ''
+if 'resultado_fase4' not in st.session_state: st.session_state['resultado_fase4'] = ''
 
 # --- FUNÇÃO PARA CARREGAR IMAGENS COM SEGURANÇA ---
 def carregar_imagem(nome_arquivo):
@@ -285,7 +286,87 @@ def pagina_fase3():
             st.session_state['pagina_atual'] = 'Fase2'
             st.rerun()
     with col_bt3:
-        if st.button("Reiniciar Todo o Processo", key='btn_f3_reiniciar', type="primary"):
+        if st.button("Avançar para Fase 4: Trabalho Presencial e Híbrido", key='btn_f3_avancar', type="primary"):
+            st.session_state['pagina_atual'] = 'Fase4'
+            st.rerun()
+
+def pagina_fase4():
+    st.header("Fase 4: O Ecossistema Presencial, Híbrido e Compliance Físico")
+    st.markdown("---")
+    
+    st.markdown("### 🏛️ Dinâmicas do Trabalho Presencial e Rituais Corporativos")
+    st.write("Esta fase avalia sua adaptação aos modelos presenciais e híbridos, com foco especial nas interações sociais e nos desafios de *behavioral compliance* no ambiente físico de escritório.")
+
+    # 1. Avaliação de Prontidão e Afinidade para o Ambiente Presencial/Híbrido
+    st.markdown("#### 🔍 Avaliação de Adequação ao Modelo Presencial/Híbrido")
+    st.write("Marque os itens abaixo para verificar sua compatibilidade com as exigências físicas e rituais do ambiente corporativo tradicional:")
+
+    with st.container(border=True):
+        col_f4_1, col_f4_2 = st.columns(2)
+        
+        with col_f4_1:
+            st.markdown("**Infraestrutura Física e Logística**")
+            deslocamento = st.checkbox("Consigo lidar bem com o tempo de deslocamento diário (*commute*)", key="pres_deslocamento")
+            rituais = st.checkbox("Valorizo rituais corporativos físicos e reuniões presenciais face a face", key="pres_rituais")
+            seguranca_fisica = st.checkbox("Cuido rigorosamente de sigilo documental e segurança física na mesa", key="pres_seguranca")
+            
+        with col_f4_2:
+            st.markdown("**Relações Interpessoais e Hierarquia**")
+            hierarquia = st.checkbox("Tenho facilidade de adaptação a estruturas hierárquicas tradicionais", key="pres_hierarquia")
+            comunicacao_direta = st.checkbox("Prefiro a agilidade da comunicação direta e imediata com a equipe no escritório", key="pres_comunicacao")
+            colaboracao = st.checkbox("Gosto de dinâmicas colaborativas e *brainstorms* presenciais em equipe", key="pres_colaboracao")
+
+        # Cálculo dinâmico da pontuação de adequação presencial
+        itens_presenciais = sum([deslocamento, rituais, seguranca_fisica, hierarquia, comunicacao_direta, colaboracao])
+        
+        st.markdown("---")
+        if itens_presenciais == 6:
+            st.success("🌟 **Fit Presencial Excelente!** Você possui forte sinergia com o ambiente de escritório, rituais corporativos e estruturas físicas tradicionais.")
+        elif itens_presenciais >= 4:
+            st.info("👍 **Bom Fit Presencial!** Você se adapta bem ao modelo físico, com pontos fortes claros para a rotina corporativa tradicional.")
+        else:
+            st.warning("⚠️ **Atenção ao Modelo:** O trabalho presencial e híbrido exige convivência diária e rituais rígidos. Considere como esses fatores impactam sua rotina e bem-estar.")
+
+    st.markdown("---")
+
+    # 2. Seção Dedicada de Vagas Presenciais e Híbridas (Grandes Portais)
+    st.markdown("### 💼 Principais Portais de Vagas Presenciais e Híbridas")
+    st.write("Explore plataformas consolidadas para encontrar oportunidades em empresas com presença física estruturada e modelos híbridos robustos:")
+
+    col_p1, col_p2, col_p3 = st.columns(3)
+
+    with col_p1:
+        with st.container(border=True):
+            st.markdown("#### 🔗 LinkedIn")
+            st.markdown("A maior rede profissional do mundo, ideal para networking corporativo e buscas por vagas presenciais de grande porte.")
+            st.markdown("[🔗 Acessar LinkedIn](https://www.linkedin.com/)")
+
+    with col_p2:
+        with st.container(border=True):
+            st.markdown("#### 🏢 Gupy & Catho")
+            st.markdown("Ecossistemas líderes em processos seletivos para o mercado corporativo tradicional brasileiro nos mais diversos setores.")
+            st.markdown("[🔗 Acessar Gupy](https://www.gupy.io/)")
+            st.markdown("[🔗 Acessar Catho](https://www.catho.com.br/)")
+
+    with col_p3:
+        with st.container(border=True):
+            st.markdown("#### 📋 InfoJobs")
+            st.markdown("Plataforma tradicional de empregos com forte foco em oportunidades presenciais em indústrias, comércio e serviços.")
+            st.markdown("[🔗 Acessar InfoJobs](https://www.infojobs.com.br/)")
+
+    st.markdown("---")
+    st.write("### Notas e Alinhamento Profissional para o Modelo Presencial/Híbrido")
+    st.text_area("Notas de progresso na Fase 4", key='resultado_fase4', height=150, placeholder="Escreva sua estratégia para atuação presencial, adaptação cultural ou metas de networking...")
+
+    st.markdown("---")
+    # Botões de navegação
+    col_bt1, col_bt2, col_bt3 = st.columns([1, 1, 4])
+    with col_bt1:
+         if st.button("Voltar à Fase 3", key='btn_f4_voltar'):
+            st.session_state['pagina_atual'] = 'Fase3'
+            st.rerun()
+    with col_bt3:
+        if st.button("Reiniciar Todo o Processo", key='btn_f4_reiniciar', type="primary"):
             st.session_state['nome'] = ''
             st.session_state['formacao'] = ''
             st.session_state['experiencia'] = ''
@@ -296,6 +377,7 @@ def pagina_fase3():
             st.session_state['questao_etica'] = ''
             st.session_state['resultado_fase2'] = ''
             st.session_state['resultado_fase3'] = ''
+            st.session_state['resultado_fase4'] = ''
             st.session_state['pagina_atual'] = 'Inicio'
             st.rerun()
 
@@ -310,6 +392,8 @@ elif pagina_atual == 'Fase2':
     pagina_fase2()
 elif pagina_atual == 'Fase3':
     pagina_fase3()
+elif pagina_atual == 'Fase4':
+    pagina_fase4()
 
 # --- RODAPÉ ---
 st.markdown("---")
