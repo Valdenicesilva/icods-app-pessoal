@@ -1,9 +1,19 @@
 import streamlit as st
 from PIL import Image
 import os
+from supabase import create_client
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Plataforma ICODS - Trilha de Desenvolvimento", layout="wide")
+
+# --- CONEXÃO COM O SUPABASE ---
+@st.cache_resource
+def init_connection():
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    return create_client(url, key)
+
+supabase = init_connection()
 
 # --- INICIALIZAÇÃO DO SESSION STATE ---
 paginas_validas = ['Inicio', 'Diagnostico', 'Fase2', 'Fase3']
@@ -91,90 +101,93 @@ def pagina_fase2():
     st.header("Fase 2: Inteligência de Mercado e Oportunidades Locais")
     st.markdown("---")
     
-    # Inserção do painel de Inteligência de Mercado (Raio-X CAGED/IBGE)
     st.markdown("""
     <style>
-        .market-intelligence-section {
-            background: #ffffff;
-            padding: 1rem 0;
-        }
-        .indicators-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .indicator-card {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid #e2e8f0;
-        }
-        .indicator-card h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 0.75rem;
-        }
-        .indicator-card p {
-            font-size: 0.9rem;
-            color: #475569;
-            margin-bottom: 0.5rem;
-            text-align: justify;
-        }
-        .career-decision-box {
-            background: rgba(45, 212, 191, 0.1);
-            border-left: 4px solid #0d9488;
-            padding: 1.25rem;
-            border-radius: 0 12px 12px 0;
-        }
-        .career-decision-box h4 {
-            color: #0f172a;
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        .career-decision-box p {
-            color: #334155;
-            font-size: 0.9rem;
-            margin: 0;
-            text-align: justify;
-        }
+        .market-intelligence-section { background: #ffffff; padding: 1rem 0; }
+        .indicators-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .indicator-card { background: #f8fafc; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; }
+        .indicator-card h3 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem; }
+        .indicator-card p { font-size: 0.9rem; color: #475569; margin-bottom: 0.5rem; text-align: justify; }
+        .career-decision-box { background: rgba(45, 212, 191, 0.1); border-left: 4px solid #0d9488; padding: 1.25rem; border-radius: 0 12px 12px 0; }
+        .career-decision-box h4 { color: #0f172a; font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .career-decision-box p { color: #334155; font-size: 0.9rem; margin: 0; text-align: justify; }
     </style>
-
-    <section class="market-intelligence-section">
-        <div class="container">
-            <div class="section-header">
-                <h3>📊 Raio-X do Mercado na sua Região</h3>
-                <p>Entenda o cenário real de empregabilidade (dados oficiais do CAGED/IBGE) para decidir onde investir seu tempo e sua carreira no Agreste Pernambucano.</p>
-            </div>
-
-            <div class="indicators-grid">
-                <div class="indicator-card">
-                    <h3>📈 Perfil de Contratações</h3>
-                    <p><strong>Destaque por Faixa Etária:</strong> Maior volume de vagas formais concentrado na faixa de 18 a 29 anos.</p>
-                    <p><strong>Recorte de Gênero/Raça:</strong> Panorama atual das admissões formais na região.</p>
-                </div>
-                
-                <div class="indicator-card">
-                    <h3>🏭 Setores que Mais Empregam</h3>
-                    <p>1. <strong>Indústria de Transformação</strong> (Calçados, Metalmecânica, Alimentos)</p>
-                    <p>2. <strong>Comércio Varejista e Atacadista</strong></p>
-                    <p>3. <strong>Serviços e Agroindústria</strong></p>
-                </div>
-            </div>
-
-            <div class="career-decision-box">
-                <h4>💡 Dica de Direcionamento Profissional</h4>
-                <p>Se a sua área pretendida apresenta baixa empregabilidade na região, o app te ajuda a identificar competências transferíveis para os setores que estão contratando ativamente no seu "quintal".</p>
-            </div>
-        </div>
-    </section>
     """, unsafe_allow_html=True)
+
+    st.markdown("### 📊 Raio-X do Mercado por Região")
+    st.write("Selecione a região, o estado e o município desejado para consultar os indicadores oficiais de empregabilidade.")
+
+    # 1. Seletor de Região
+    regioes = ["Norte", "Nordeste", "Sul", "Sudeste", "Centro-Oeste"]
+    regiao_selecionada = st.selectbox("Selecione a Região:", regioes)
+
+    estados_por_regiao = {
+        "Norte": ["Acre", "Amapá", "Amazonas", "Pará", "Rondônia", "Roraima", "Tocantins"],
+        "Nordeste": ["Alagoas", "Bahia", "Ceará", "Maranhão", "Paraíba", "Pernambuco", "Piauí", "Rio Grande do Norte", "Sergipe"],
+        "Sul": ["Paraná", "Rio Grande do Sul", "Santa Catarina"],
+        "Sudeste": ["Espírito Santo", "Minas Gerais", "Rio de Janeiro", "São Paulo"],
+        "Centro-Oeste": ["Distrito Federal", "Goiás", "Mato Grosso", "Mato Grosso do Sul"]
+    }
+
+    # 2. Seletor de Estado filtrado pela Região
+    estado_selecionado = st.selectbox("Selecione o Estado:", estados_por_regiao.get(regiao_selecionada, []))
+
+    # Buscar municípios disponíveis no Supabase para o estado selecionado
+    try:
+        resp_cidades = supabase.table("indicadores_regionais").select("cidade").eq("regiao", regiao_selecionada).eq("estado", estado_selecionado).execute()
+        cidades_disponiveis = [item["cidade"] for item in resp_cidades.data] if resp_cidades.data else []
+    except Exception:
+        cidades_disponiveis = []
+
+    if cidades_disponiveis:
+        cidade_selecionada = st.selectbox("Selecione o Município:", cidades_disponiveis)
+        
+        # Buscar dados completos do município escolhido
+        response = supabase.table("indicadores_regionais").select("*").eq("cidade", cidade_selecionada).execute()
+        dados = response.data[0] if response.data else None
+
+        if dados:
+            st.info(f"📅 **Mês de Referência dos Dados:** {dados.get('mes_referencia', 'N/A')}")
+
+            faixa = dados.get('faixa_etaria', 'Sem dados cadastrados.')
+            genero = dados.get('genero_raca', 'Sem dados cadastrados.')
+            setores = dados.get('setores_lideres', [])
+
+            setores_html = ""
+            if setores:
+                for idx, setor in enumerate(setores, 1):
+                    setores_html += f"<p>{idx}. <strong>{setor}</strong></p>"
+            else:
+                setores_html = "<p>Nenhum setor registrado.</p>"
+
+            html_card = f"""
+            <div class="market-intelligence-section">
+                <div class="indicators-grid">
+                    <div class="indicator-card">
+                        <h3>📈 Perfil de Contratações ({cidade_selecionada})</h3>
+                        <p><strong>Destaque por Faixa Etária:</strong> {faixa}</p>
+                        <p><strong>Recorte de Gênero/Raça:</strong> {genero}</p>
+                    </div>
+                    
+                    <div class="indicator-card">
+                        <h3>🏭 Setores que Mais Empregam</h3>
+                        {setores_html}
+                    </div>
+                </div>
+
+                <div class="career-decision-box">
+                    <h4>💡 Dica de Direcionamento Profissional</h4>
+                    <p>O app cruza o seu perfil comportamental com a realidade econômica deste município para orientar suas transições de carreira.</p>
+                </div>
+            </div>
+            """
+            st.markdown(html_card, unsafe_allow_html=True)
+    else:
+        st.warning(f"Ainda não há municípios cadastrados no banco para o estado de {estado_selecionado} ({regiao_selecionada}).")
 
     st.markdown("---")
     st.write("### Notas e Alinhamento Profissional")
-    st.text_area("Notas de progresso na Fase 2", key='resultado_fase2', height=150, placeholder="Escreva suas reflexões sobre as oportunidades mapeadas na região...")
+    st.text_area("Notas de progresso na Fase 2", key='resultado_fase2', height=150, placeholder="Escreva suas reflexões sobre as oportunidades mapeadas...")
 
     st.markdown("---")
     # Botões de navegação
