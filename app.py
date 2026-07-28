@@ -21,12 +21,14 @@ paginas_validas = ['Inicio', 'Diagnostico', 'Fase2', 'Fase3']
 if 'pagina_atual' not in st.session_state or st.session_state['pagina_atual'] not in paginas_validas:
     st.session_state['pagina_atual'] = 'Inicio'
 
-# Inicialização dos dados do usuário
+# Inicialização dos dados do usuário (Fase 1 e demais)
 if 'nome' not in st.session_state: st.session_state['nome'] = ''
 if 'formacao' not in st.session_state: st.session_state['formacao'] = ''
 if 'experiencia' not in st.session_state: st.session_state['experiencia'] = ''
 if 'interesses' not in st.session_state: st.session_state['interesses'] = []
-if 'estilo' not in st.session_state: st.session_state['estilo'] = 'Analítico'
+if 'contexto_regiao' not in st.session_state: st.session_state['contexto_regiao'] = ''
+if 'ambiente_ideal' not in st.session_state: st.session_state['ambiente_ideal'] = ''
+if 'cenario_simulado' not in st.session_state: st.session_state['cenario_simulado'] = 0
 if 'questao_etica' not in st.session_state: st.session_state['questao_etica'] = ''
 
 # Variáveis para armazenar os resultados das fases
@@ -72,19 +74,42 @@ def pagina_inicio():
 def pagina_diagnostico():
     st.header("Fase 1: Diagnóstico Comportamental e de Carreira")
     st.markdown("---")
-    st.subheader("Dados Profissionais")
+    
+    # --- CAMADA 1: Aspirações, Interesses e Contexto ---
+    st.subheader("📌 Camada 1: Aspirações, Contexto e Alinhamento de Valores")
+    st.write("Mapeie suas preferências profissionais, áreas de interesse e o cenário contextual em que você atua.")
+    
     col1, col2 = st.columns(2)
     with col1:
         st.text_input("Nome Completo", key='nome')
         st.text_input("Formação Acadêmica", key='formacao')
+        st.multiselect("Áreas de Interesse Profissional", ["Compliance", "Direito", "RH", "Gestão", "Tecnologia", "Operações"], key='interesses')
     with col2:
         st.text_input("Área de Experiência Principal", key='experiencia')
-        st.multiselect("Áreas de Interesse Profissional", ["Compliance", "Direito", "RH", "Gestão", "Tecnologia"], key='interesses')
+        st.text_input("Cidade e Estado onde Reside (Contexto Regional)", key='contexto_regiao')
+        st.text_input("Ambiente Corporativo Ideal (Ex: Colaborativo, Estruturado, Inovador)", key='ambiente_ideal')
+
     st.markdown("---")
-    st.subheader("Diagnóstico Rápido de Estilo")
-    st.radio("Como você descreve o seu estilo de trabalho?", ["Analítico", "Colaborativo", "Dinâmico", "Liderança"], key='estilo')
+    
+    # --- CAMADA 2: Cenários Simulados de Tomada de Decisão ---
+    st.subheader("⚙️ Camada 2: Cenários Simulados de Tomada de Decisão (O Comportamento em Ação)")
+    st.write("Analise o mini-dilema prático abaixo e escolha a conduta que melhor reflete sua postura profissional diante de desafios reais:")
+
+    with st.container(border=True):
+        st.markdown("**Desafio Prático:** *Você está sob um prazo extremamente apertado para entregar um relatório crítico de conformidade, mas percebe uma inconsistência de dados que pode invalidar parte da conclusão. O que você faz?*")
+        st.radio(
+            "Selecione a conduta que melhor descreve sua abordagem:",
+            [
+                "A) Entrego o relatório no prazo com a inconsistência e aviso a liderança depois para evitar atrasos.",
+                "B) Alerto imediatamente a liderança sobre a inconsistência, proponho um ajuste rápido e renegocio o prazo se necessário.",
+                "C) Paro a entrega totalmente e refaço todo o processo sozinho, sem comunicar o impacto no prazo imediato.",
+                "D) Ignoro a inconsistência, pois o volume de entregas anterior compensa o erro pontual."
+            ],
+            key='cenario_simulado'
+        )
+
     st.markdown("---")
-    st.text_area("Descreva uma situação que considera um dilema ético na sua carreira (Opcional)", key='questao_etica')
+    st.text_area("Descreva brevemente sua reflexão sobre o cenário ou um dilema ético real que já enfrentou (Opcional)", key='questao_etica')
     st.markdown("---")
 
     # Botões de navegação
@@ -265,7 +290,9 @@ def pagina_fase3():
             st.session_state['formacao'] = ''
             st.session_state['experiencia'] = ''
             st.session_state['interesses'] = []
-            st.session_state['estilo'] = 'Analítico'
+            st.session_state['contexto_regiao'] = ''
+            st.session_state['ambiente_ideal'] = ''
+            st.session_state['cenario_simulado'] = 0
             st.session_state['questao_etica'] = ''
             st.session_state['resultado_fase2'] = ''
             st.session_state['resultado_fase3'] = ''
