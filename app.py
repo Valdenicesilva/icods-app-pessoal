@@ -38,6 +38,12 @@ if 'resultado_fase4' not in st.session_state: st.session_state['resultado_fase4'
 if 'resultado_fase5' not in st.session_state: st.session_state['resultado_fase5'] = ''
 if 'optin_banco_talentos' not in st.session_state: st.session_state['optin_banco_talentos'] = False
 
+# Travas de conclusão de fases (Validação Comportamental de Fluxo)
+if 'fase1_concluida' not in st.session_state: st.session_state['fase1_concluida'] = False
+if 'fase2_concluida' not in st.session_state: st.session_state['fase2_concluida'] = False
+if 'fase3_concluida' not in st.session_state: st.session_state['fase3_concluida'] = False
+if 'fase4_concluida' not in st.session_state: st.session_state['fase4_concluida'] = False
+
 # --- FUNÇÃO PARA CARREGAR IMAGENS COM SEGURANÇA ---
 def carregar_imagem(nome_arquivo):
     """Carrega uma imagem da pasta local (raiz)."""
@@ -53,7 +59,6 @@ def carregar_imagem(nome_arquivo):
         return None
 
 # --- DEFINIÇÃO DAS PÁGINAS (FUNÇÕES) ---
-
 def pagina_inicio():
     st.title("Trilha de Orientação Profissional e Behavioral Compliance")
     st.markdown("---")
@@ -81,13 +86,13 @@ def pagina_diagnostico():
     
     col1, col2 = st.columns(2)
     with col1:
-        st.text_input("Nome Completo", key='nome')
-        st.text_input("Formação Acadêmica", key='formacao')
+        st.text_input("Nome Completo (*Obrigatório)", key='nome')
+        st.text_input("Formação Acadêmica (*Obrigatório)", key='formacao')
         st.multiselect("Áreas de Interesse Profissional", ["Compliance", "Direito", "RH", "Gestão", "Tecnologia", "Operações"], key='interesses')
     with col2:
-        st.text_input("Área de Experiência Principal", key='experiencia')
-        st.text_input("Cidade e Estado onde Reside (Contexto Regional)", key='contexto_regiao')
-        st.text_input("Ambiente Corporativo Ideal (Ex: Colaborativo, Estruturado, Inovador)", key='ambiente_ideal')
+        st.text_input("Área de Experiência Principal (*Obrigatório)", key='experiencia')
+        st.text_input("Cidade e Estado onde Reside (*Obrigatório)", key='contexto_regiao')
+        st.text_input("Ambiente Corporativo Ideal (*Obrigatório)", key='ambiente_ideal')
 
     st.markdown("---")
     
@@ -118,10 +123,23 @@ def pagina_diagnostico():
             st.rerun()
     with col_bt3:
         if st.button("Avançar para Fase 2: Raio-X e Oportunidades", key='btn_diag_avancar', type="primary"):
-            st.session_state['pagina_atual'] = 'Fase2'
-            st.rerun()
+            # Validação obrigatória para impedir avanço sem preencher dados
+            if not st.session_state.get('nome') or not st.session_state.get('formacao') or not st.session_state.get('experiencia') or not st.session_state.get('contexto_regiao') or not st.session_state.get('ambiente_ideal'):
+                st.warning("⚠️ **Atenção:** Preencha todos os campos obrigatórios (Nome, Formação, Experiência, Contexto Regional e Ambiente Ideal) para prosseguir na trilha.")
+            else:
+                st.session_state['fase1_concluida'] = True
+                st.session_state['pagina_atual'] = 'Fase2'
+                st.rerun()
 
 def pagina_fase2():
+    # Trava de segurança: impede acesso direto sem concluir a fase anterior
+    if not st.session_state.get('fase1_concluida'):
+        st.warning("🔒 **Acesso Bloqueado:** Você precisa concluir a Fase 1 (Diagnóstico) preenchendo todos os campos obrigatórios antes de acessar esta etapa.")
+        if st.button("Ir para Fase 1 (Diagnóstico)"):
+            st.session_state['pagina_atual'] = 'Diagnostico'
+            st.rerun()
+        return
+
     st.header("Fase 2: Inteligência de Mercado e Oportunidades Locais")
     st.markdown("---")
 
@@ -182,7 +200,7 @@ def pagina_fase2():
                     st.success("💡 **Dica de Direcionamento Profissional:** O app cruza o seu perfil comportamental com a realidade econômica deste município.")
 
     st.markdown("---")
-    st.write("### Notas e Alinhamento Profissional")
+    st.write("### Notas e Alinhamento Profissional (*Obrigatório preencher para avançar*)")
     st.text_area("Notas de progresso na Fase 2", key='resultado_fase2', height=150, placeholder="Escreva suas reflexões sobre as oportunidades mapeadas...")
 
     st.markdown("---")
@@ -193,10 +211,21 @@ def pagina_fase2():
             st.rerun()
     with col_bt3:
         if st.button("Avançar para Fase 3: Trabalho Remoto", key='btn_f2_avancar', type="primary"):
-            st.session_state['pagina_atual'] = 'Fase3'
-            st.rerun()
+            if not st.session_state.get('resultado_fase2'):
+                st.warning("⚠️ **Atenção:** Escreva suas notas de reflexão na Fase 2 antes de prosseguir para a próxima etapa.")
+            else:
+                st.session_state['fase2_concluida'] = True
+                st.session_state['pagina_atual'] = 'Fase3'
+                st.rerun()
 
 def pagina_fase3():
+    if not st.session_state.get('fase2_concluida'):
+        st.warning("🔒 **Acesso Bloqueado:** Conclua e salve as notas da Fase 2 antes de acessar esta etapa.")
+        if st.button("Ir para Fase 2"):
+            st.session_state['pagina_atual'] = 'Fase2'
+            st.rerun()
+        return
+
     st.header("Fase 3: O Ecossistema Virtual e de Trabalho Remoto")
     st.markdown("---")
     
@@ -246,7 +275,7 @@ def pagina_fase3():
             st.markdown("[🔗 Remote.co](https://remote.co/)")
 
     st.markdown("---")
-    st.text_area("Notas de progresso na Fase 3", key='resultado_fase3', height=150)
+    st.text_area("Notas de progresso na Fase 3 (*Obrigatório preencher para avançar*)", key='resultado_fase3', height=150)
 
     st.markdown("---")
     col_bt1, col_bt2, col_bt3 = st.columns([1, 1, 4])
@@ -256,10 +285,21 @@ def pagina_fase3():
             st.rerun()
     with col_bt3:
         if st.button("Avançar para Fase 4: Trabalho Presencial e Híbrido", key='btn_f3_avancar', type="primary"):
-            st.session_state['pagina_atual'] = 'Fase4'
-            st.rerun()
+            if not st.session_state.get('resultado_fase3'):
+                st.warning("⚠️ **Atenção:** Preencha as notas de progresso da Fase 3 para prosseguir.")
+            else:
+                st.session_state['fase3_concluida'] = True
+                st.session_state['pagina_atual'] = 'Fase4'
+                st.rerun()
 
 def pagina_fase4():
+    if not st.session_state.get('fase3_concluida'):
+        st.warning("🔒 **Acesso Bloqueado:** Conclua a Fase 3 preenchendo as notas de progresso antes de acessar esta etapa.")
+        if st.button("Ir para Fase 3"):
+            st.session_state['pagina_atual'] = 'Fase3'
+            st.rerun()
+        return
+
     st.header("Fase 4: O Ecossistema Presencial, Híbrido e Compliance Físico")
     st.markdown("---")
     
@@ -306,7 +346,7 @@ def pagina_fase4():
             st.markdown("[🔗 Acessar InfoJobs](https://www.infojobs.com.br/)")
 
     st.markdown("---")
-    st.text_area("Notas de progresso na Fase 4", key='resultado_fase4', height=150)
+    st.text_area("Notas de progresso na Fase 4 (*Obrigatório preencher para avançar*)", key='resultado_fase4', height=150)
 
     st.markdown("---")
     col_bt1, col_bt2, col_bt3 = st.columns([1, 1, 4])
@@ -316,10 +356,21 @@ def pagina_fase4():
             st.rerun()
     with col_bt3:
         if st.button("Avançar para Fase 5: Upskilling, Currículo, Apoio e Oportunidades", key='btn_f4_avancar', type="primary"):
-            st.session_state['pagina_atual'] = 'Fase5'
-            st.rerun()
+            if not st.session_state.get('resultado_fase4'):
+                st.warning("⚠️ **Atenção:** Preencha as notas de progresso da Fase 4 para prosseguir.")
+            else:
+                st.session_state['fase4_concluida'] = True
+                st.session_state['pagina_atual'] = 'Fase5'
+                st.rerun()
 
 def pagina_fase5():
+    if not st.session_state.get('fase4_concluida'):
+        st.warning("🔒 **Acesso Bloqueado:** Conclua a Fase 4 preenchendo as notas de progresso antes de acessar esta etapa final.")
+        if st.button("Ir para Fase 4"):
+            st.session_state['pagina_atual'] = 'Fase4'
+            st.rerun()
+        return
+
     st.header("Fase 5: Trilha de Upskilling, Currículo Humano, Rede de Apoio e Oportunidades")
     st.markdown("---")
     
@@ -398,14 +449,14 @@ def pagina_fase5():
             st.markdown("Sessões online individuais de orientação profissional e **simulação de entrevista de compliance** diretamente com especialistas.")
             st.markdown("- **Foco:** Prática de postura em dilemas éticos, técnicas de entrevista e posicionamento.")
             if st.button("Quero Saber Mais sobre Mentoria", key='btn_mentoria'):
-                st.info("💡 Entre em contato pelo e-mail parceiros@icods.com.br para agendar sua sessão de mentoria individual.")
+                st.info("💡 Entre em contato pelo e-mail **icods.parceiros@gmail.com** para agendar sua sessão de mentoria individual.")
     with col_mon2:
         with st.container(border=True):
             st.markdown("#### 📝 Análise de Currículo Personalizada")
             st.markdown("Um serviço humano de revisão e reescrita cirúrgica do seu currículo para focar em entregas e evitar barreiras de IA (ATS).")
             st.markdown("- **Foco:** Transformar descrições vagas em um histórico magnético de resultados.")
             if st.button("Quero Análise de Currículo", key='btn_curriculo'):
-                st.info("💡 Envie seu currículo atual para curriculo@icods.com.br e nossa equipe especializada fará a reestruturação.")
+                st.info("💡 Envie seu currículo atual para **icods.curriculos@gmail.com** e nossa equipe especializada fará a reestruturação.")
 
     st.markdown("---")
     st.text_area("Notas e plano de ação final (Fase 5)", key='resultado_fase5', height=150, placeholder="Escreva seus próximos passos de capacitação, ajustes no currículo e compromissos de autocuidado...")
@@ -418,7 +469,7 @@ def pagina_fase5():
             st.rerun()
     with col_bt3:
         if st.button("Reiniciar Todo o Processo", key='btn_f5_reiniciar', type="primary"):
-            # Limpa o state
+            # Limpa o state e as flags de conclusão
             for key in list(st.session_state.keys()):
                 if isinstance(st.session_state[key], str):
                     st.session_state[key] = ''
