@@ -17,7 +17,7 @@ def init_connection():
 supabase = init_connection()
 
 # --- INICIALIZAÇÃO DO SESSION STATE ---
-paginas_validas = ['Inicio', 'Diagnostico', 'Fase2', 'Fase3', 'Fase4', 'Fase5']
+paginas_validas = ['Inicio', 'Diagnostico', 'Fase2', 'Fase3', 'Fase4', 'Fase5', 'Relatorio']
 if 'pagina_atual' not in st.session_state or st.session_state['pagina_atual'] not in paginas_validas:
     st.session_state['pagina_atual'] = 'Inicio'
 
@@ -43,6 +43,7 @@ if 'fase1_concluida' not in st.session_state: st.session_state['fase1_concluida'
 if 'fase2_concluida' not in st.session_state: st.session_state['fase2_concluida'] = False
 if 'fase3_concluida' not in st.session_state: st.session_state['fase3_concluida'] = False
 if 'fase4_concluida' not in st.session_state: st.session_state['fase4_concluida'] = False
+if 'fase5_concluida' not in st.session_state: st.session_state['fase5_concluida'] = False
 
 # --- FUNÇÃO PARA CARREGAR IMAGENS COM SEGURANÇA ---
 def carregar_imagem(nome_arquivo):
@@ -123,7 +124,6 @@ def pagina_diagnostico():
             st.rerun()
     with col_bt3:
         if st.button("Avançar para Fase 2: Raio-X e Oportunidades", key='btn_diag_avancar', type="primary"):
-            # Validação obrigatória para impedir avanço sem preencher dados
             if not st.session_state.get('nome') or not st.session_state.get('formacao') or not st.session_state.get('experiencia') or not st.session_state.get('contexto_regiao') or not st.session_state.get('ambiente_ideal'):
                 st.warning("⚠️ **Atenção:** Preencha todos os campos obrigatórios (Nome, Formação, Experiência, Contexto Regional e Ambiente Ideal) para prosseguir na trilha.")
             else:
@@ -132,7 +132,6 @@ def pagina_diagnostico():
                 st.rerun()
 
 def pagina_fase2():
-    # Trava de segurança: impede acesso direto sem concluir a fase anterior
     if not st.session_state.get('fase1_concluida'):
         st.warning("🔒 **Acesso Bloqueado:** Você precisa concluir a Fase 1 (Diagnóstico) preenchendo todos os campos obrigatórios antes de acessar esta etapa.")
         if st.button("Ir para Fase 1 (Diagnóstico)"):
@@ -459,7 +458,7 @@ def pagina_fase5():
                 st.info("💡 Envie seu currículo atual para **icods.curriculos@gmail.com** e nossa equipe especializada fará a reestruturação.")
 
     st.markdown("---")
-    st.text_area("Notas e plano de ação final (Fase 5)", key='resultado_fase5', height=150, placeholder="Escreva seus próximos passos de capacitação, ajustes no currículo e compromissos de autocuidado...")
+    st.text_area("Notas e plano de ação final (Fase 5) (*Obrigatório preencher para gerar o relatório*)", key='resultado_fase5', height=150, placeholder="Escreva seus próximos passos de capacitação, ajustes no currículo e compromissos de autocuidado...")
 
     st.markdown("---")
     col_bt1, col_bt2, col_bt3 = st.columns([1, 1, 4])
@@ -468,17 +467,89 @@ def pagina_fase5():
             st.session_state['pagina_atual'] = 'Fase4'
             st.rerun()
     with col_bt3:
-        if st.button("Reiniciar Todo o Processo", key='btn_f5_reiniciar', type="primary"):
-            # Limpa o state e as flags de conclusão
-            for key in list(st.session_state.keys()):
-                if isinstance(st.session_state[key], str):
-                    st.session_state[key] = ''
-                elif isinstance(st.session_state[key], list):
-                    st.session_state[key] = []
-                elif isinstance(st.session_state[key], bool):
-                    st.session_state[key] = False
-                else:
-                    st.session_state[key] = 0
+        if st.button("Gerar Relatório Final de Desenvolvimento", key='btn_gerar_relatorio', type="primary"):
+            if not st.session_state.get('resultado_fase5'):
+                st.warning("⚠️ **Atenção:** Preencha o plano de ação final na Fase 5 para consolidar seu relatório.")
+            else:
+                st.session_state['fase5_concluida'] = True
+                st.session_state['pagina_atual'] = 'Relatorio'
+                st.rerun()
+
+def pagina_relatorio():
+    if not st.session_state.get('fase5_concluida'):
+        st.warning("🔒 **Acesso Bloqueado:** Conclua todas as fases anteriores para visualizar o relatório final.")
+        if st.button("Ir para Fase 5"):
+            st.session_state['pagina_atual'] = 'Fase5'
+            st.rerun()
+        return
+
+    st.header("📋 Relatório Final: Trilha ICODS de Behavioral Compliance")
+    st.markdown("---")
+    st.write("Parabéns por concluir a jornada! Abaixo está o consolidado do seu diagnóstico profissional, alinhamento comportamental e plano de ação.")
+
+    interesses_str = ", ".join(st.session_state.get('interesses', []))
+    relatorio_texto = f"""==================================================
+RELATÓRIO DE DESENVOLVIMENTO PROFISSIONAL - ICODS
+==================================================
+
+1. DADOS CADASTRAIS E PERFIL
+- Nome: {st.session_state.get('nome')}
+- Formação: {st.session_state.get('formacao')}
+- Experiência Principal: {st.session_state.get('experiencia')}
+- Região: {st.session_state.get('contexto_regiao')}
+- Áreas de Interesse: {interesses_str}
+- Ambiente Ideal: {st.session_state.get('ambiente_ideal')}
+
+2. TOMADA DE DECISÃO ÉTICA (DILEMA SIMULADO)
+- Escolha no cenário prático: Opção {st.session_state.get('cenario_simulado')}
+- Reflexão / Dilema Real relatado: {st.session_state.get('questao_etica', 'Nenhuma reflexão adicional registrada.')}
+
+3. NOTAS DE PROGRESSO POR FASE
+- Fase 2 (Inteligência de Mercado): {st.session_state.get('resultado_fase2')}
+- Fase 3 (Ecossistema Virtual / Remoto): {st.session_state.get('resultado_fase3')}
+- Fase 4 (Ecossistema Presencial / Híbrido): {st.session_state.get('resultado_fase4')}
+- Fase 5 (Upskilling e Plano de Ação): {st.session_state.get('resultado_fase5')}
+
+4. AUTORIZAÇÃO BANCO DE TALENTOS B2B
+- Opt-in Autorizado: {'Sim' if st.session_state.get('optin_banco_talentos') else 'Não'}
+
+==================================================
+© 2026 | ICODS - Plataforma de Behavioral Compliance
+==================================================
+"""
+
+    with st.container(border=True):
+        st.markdown(f"### 👤 Perfil: {st.session_state.get('nome')}")
+        st.markdown(f"**Formação:** {st.session_state.get('formacao')} | **Experiência:** {st.session_state.get('experiencia')}")
+        st.markdown(f"**Localidade:** {st.session_state.get('contexto_regiao')} | **Áreas de Interesse:** {interesses_str}")
+        st.markdown(f"**Ambiente Desejado:** {st.session_state.get('ambiente_ideal')}")
+    
+    with st.container(border=True):
+        st.markdown("### ⚙️ Síntese Comportamental e Notas das Fases")
+        st.markdown(f"**Reflexão Fase 2:** {st.session_state.get('resultado_fase2')}")
+        st.markdown(f"**Reflexão Fase 3:** {st.session_state.get('resultado_fase3')}")
+        st.markdown(f"**Reflexão Fase 4:** {st.session_state.get('resultado_fase4')}")
+        st.markdown(f"**Plano de Ação (Fase 5):** {st.session_state.get('resultado_fase5')}")
+
+    st.markdown("---")
+    
+    st.download_button(
+        label="📥 Descarregar Relatório Completo (.txt)",
+        data=relatorio_texto,
+        file_name="Relatorio_Desenvolvimento_ICODS.txt",
+        mime="text/plain",
+        type="primary"
+    )
+
+    st.markdown("---")
+    col_bt1, col_bt2 = st.columns(2)
+    with col_bt1:
+        if st.button("Voltar à Fase 5"):
+            st.session_state['pagina_atual'] = 'Fase5'
+            st.rerun()
+    with col_bt2:
+        if st.button("Reiniciar Todo o Processo", key='btn_rel_reiniciar'):
+            st.session_state.clear()
             st.session_state['pagina_atual'] = 'Inicio'
             st.rerun()
 
@@ -497,6 +568,8 @@ elif pagina_atual == 'Fase4':
     pagina_fase4()
 elif pagina_atual == 'Fase5':
     pagina_fase5()
+elif pagina_atual == 'Relatorio':
+    pagina_relatorio()
 
 # --- RODAPÉ ---
 st.markdown("---")
