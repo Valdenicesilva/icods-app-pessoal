@@ -25,6 +25,8 @@ if 'pagina_atual' not in st.session_state or st.session_state['pagina_atual'] no
 if 'nome' not in st.session_state: st.session_state['nome'] = ''
 if 'formacao' not in st.session_state: st.session_state['formacao'] = ''
 if 'experiencia' not in st.session_state: st.session_state['experiencia'] = ''
+if 'raca_etnia' not in st.session_state: st.session_state['raca_etnia'] = ''
+if 'renda' not in st.session_state: st.session_state['renda'] = ''
 if 'interesses' not in st.session_state: st.session_state['interesses'] = []
 if 'contexto_regiao' not in st.session_state: st.session_state['contexto_regiao'] = ''
 if 'ambiente_ideal' not in st.session_state: st.session_state['ambiente_ideal'] = ''
@@ -89,11 +91,13 @@ def pagina_diagnostico():
     with col1:
         st.text_input("Nome Completo (*Obrigatório)", key='nome')
         st.text_input("Formação Acadêmica (*Obrigatório)", key='formacao')
+        st.selectbox("Raça/Etnia (*Obrigatório)", ["", "Branca", "Preta", "Parda", "Amarela", "Indígena", "Outra / Prefiro não declarar"], key='raca_etnia')
         st.multiselect("Áreas de Interesse Profissional", ["Compliance", "Direito", "RH", "Gestão", "Tecnologia", "Operações"], key='interesses')
     with col2:
         st.text_input("Área de Experiência Principal (*Obrigatório)", key='experiencia')
         st.text_input("Cidade e Estado onde Reside (*Obrigatório)", key='contexto_regiao')
         st.text_input("Ambiente Corporativo Ideal (*Obrigatório)", key='ambiente_ideal')
+        st.selectbox("Faixa de Renda Atual (*Obrigatório)", ["", "Até 1 salário mínimo", "De 1 a 3 salários mínimos", "De 3 a 6 salários mínimos", "Acima de 6 salários mínimos", "Sem renda atual"], key='renda')
 
     st.markdown("---")
     
@@ -124,8 +128,8 @@ def pagina_diagnostico():
             st.rerun()
     with col_bt3:
         if st.button("Avançar para Fase 2: Raio-X e Oportunidades", key='btn_diag_avancar', type="primary"):
-            if not st.session_state.get('nome') or not st.session_state.get('formacao') or not st.session_state.get('experiencia') or not st.session_state.get('contexto_regiao') or not st.session_state.get('ambiente_ideal'):
-                st.warning("⚠️ **Atenção:** Preencha todos os campos obrigatórios (Nome, Formação, Experiência, Contexto Regional e Ambiente Ideal) para prosseguir na trilha.")
+            if not st.session_state.get('nome') or not st.session_state.get('formacao') or not st.session_state.get('experiencia') or not st.session_state.get('contexto_regiao') or not st.session_state.get('ambiente_ideal') or not st.session_state.get('raca_etnia') or not st.session_state.get('renda'):
+                st.warning("⚠️ **Atenção:** Preencha todos os campos obrigatórios (Nome, Formação, Experiência, Contexto Regional, Ambiente Ideal, Raça/Etnia e Renda) para prosseguir na trilha.")
             else:
                 st.session_state['fase1_concluida'] = True
                 st.session_state['pagina_atual'] = 'Fase2'
@@ -496,6 +500,8 @@ RELATÓRIO DE DESENVOLVIMENTO PROFISSIONAL - ICODS
 - Nome: {st.session_state.get('nome')}
 - Formação: {st.session_state.get('formacao')}
 - Experiência Principal: {st.session_state.get('experiencia')}
+- Raça/Etnia: {st.session_state.get('raca_etnia')}
+- Faixa de Renda: {st.session_state.get('renda')}
 - Região: {st.session_state.get('contexto_regiao')}
 - Áreas de Interesse: {interesses_str}
 - Ambiente Ideal: {st.session_state.get('ambiente_ideal')}
@@ -521,6 +527,7 @@ RELATÓRIO DE DESENVOLVIMENTO PROFISSIONAL - ICODS
     with st.container(border=True):
         st.markdown(f"### 👤 Perfil: {st.session_state.get('nome')}")
         st.markdown(f"**Formação:** {st.session_state.get('formacao')} | **Experiência:** {st.session_state.get('experiencia')}")
+        st.markdown(f"**Raça/Etnia:** {st.session_state.get('raca_etnia')} | **Faixa de Renda:** {st.session_state.get('renda')}")
         st.markdown(f"**Localidade:** {st.session_state.get('contexto_regiao')} | **Áreas de Interesse:** {interesses_str}")
         st.markdown(f"**Ambiente Desejado:** {st.session_state.get('ambiente_ideal')}")
     
